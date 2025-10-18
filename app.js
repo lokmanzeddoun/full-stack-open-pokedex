@@ -11,7 +11,7 @@ app.get('/version', (req, res) => {
 })
 
 app.get('/', (req, res) => {
-  res.send("Adding New Feature")
+  res.send("Adding New Feature - 2- updated")
 })
 
 app.get('/health', (req, res) => {
