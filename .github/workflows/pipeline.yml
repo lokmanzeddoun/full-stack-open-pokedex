@@ -47,8 +47,10 @@ jobs:
         runs-on: ubuntu-latest
         if: github.event_name == 'push'
         steps:
+          - name: Checkout repository
+            uses: actions/checkout@v3
           - name: Create Tag
-            uses: anothrNick/github-tag-action@v1
+            uses: anothrNick/github-tag-action@1.64.0
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               DEFAULT_BUMP: patch
