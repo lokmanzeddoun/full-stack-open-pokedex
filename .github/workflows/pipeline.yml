@@ -17,3 +17,7 @@ jobs:
               run: npm install
             - name: Check Style
               run: npm run eslint
+            - name : Build Application
+              run: npm run build
+            - name: Run Tests
+              run: npm test
