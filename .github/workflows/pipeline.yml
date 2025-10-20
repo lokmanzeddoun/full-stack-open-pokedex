@@ -7,13 +7,12 @@ on:
     pull_request:
           branches: [main]
           types: [opened, synchronize]
+env:
+  DEPLOY: ${{github.event_name == 'push' && !contains(join(github.event.commits.*.message),'#skip')}}
 
 jobs:
     simple_deployment_pipeline:
         runs-on: ubuntu-latest
-        outputs:
-            job2_can_run: ${{ job.status== 'success' }}
-            skip_deploy: ${{ contains(github.event.head_commit.message, '#skip') }}
         steps:
             - uses: actions/checkout@v4
             - uses: actions/setup-node@v4
@@ -51,17 +50,17 @@ jobs:
                   path: playwright-report/
                   retention-days: 30
             - name: Setup Flyctl
-              if: ${{ !contains(github.event.head_commit.message, '#skip') && github.event_name == 'push' }}
+              if: ${{ env.DEPLOY == 'true' }} 
               uses: superfly/flyctl-actions/setup-flyctl@master
             - name: Deploy To Fly.io
-              if: ${{ !contains(github.event.head_commit.message, '#skip') && github.event_name == 'push' }}
+              if: ${{ env.DEPLOY == 'true' }}
               run: flyctl deploy --remote-only
               env:
                   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     tag_release:
         needs: [simple_deployment_pipeline]
         runs-on: ubuntu-latest
-        if: (github.event_name == 'push') && (needs.simple_deployment_pipeline.outputs.job2_can_run == 'true') && !needs.simple_deployment_pipeline.outputs.skip_deploy
+        if: ${{ env.DEPLOY == 'true' }}
         steps:
           - name: Checkout repository
             uses: actions/checkout@v3
@@ -83,19 +82,3 @@ jobs:
                 Deployed by: ${{ github.actor }}
                 Version: ${{ steps.create_tag.outputs.new_tag }}
               username: 'GitHub Actions Bot'
-    # success_notification:
-    #     needs: [simple_deployment_pipeline, tag_release]
-    #     runs-on: ubuntu-latest
-    #     if: needs.simple_deployment_pipeline.outputs.job2_can_run == 'true'
-    #     steps:
-    #         - name: Send Success Notification
-    #           uses: rjstone/discord-webhook-notify@v2
-    #           with:
-    #             webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-    #             text: |
-    #               Deployment Succeeded!
-    #               Repository: ${{ github.repository }}
-    #               Commit: ${{ github.sha }}
-    #               Environment: Production
-    #               Deployed by: ${{ github.actor }}
-    #             username: 'GitHub Actions Bot'
