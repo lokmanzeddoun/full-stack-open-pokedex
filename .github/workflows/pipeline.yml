@@ -61,7 +61,7 @@ jobs:
     tag_release:
         needs: [simple_deployment_pipeline]
         runs-on: ubuntu-latest
-        if: (github.event_name == 'push') && (needs.simple_deployment_pipeline.outputs.job2_can_run == 'true') && !needs.simple_deployment_pipeline.outputs.skip_deploy
+        if: (github.event_name == 'push') && !needs.simple_deployment_pipeline.outputs.skip_deploy
         steps:
           - name: Checkout repository
             uses: actions/checkout@v3
