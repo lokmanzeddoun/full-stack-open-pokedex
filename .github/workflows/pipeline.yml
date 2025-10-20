@@ -12,7 +12,7 @@ jobs:
     simple_deployment_pipeline:
         runs-on: ubuntu-latest
         outputs:
-            job2_can_run: ${{ steps.final.outcome == 'success' }}
+            job2_can_run: ${{ job.status== 'success' }}
             skip_deploy: ${{ contains(github.event.head_commit.message, '#skip') }}
         steps:
             - uses: actions/checkout@v4
