@@ -25,6 +25,18 @@ jobs:
               run: npm run eslint
             - name: Build Application
               run: npm run build
+            - name: Build Failure Discord Notification
+              uses: rjstone/discord-webhook-notify@v2
+              if: ${{ failure() }}
+              with:
+                  webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+                  text: |
+                    Build Failed!
+                    Repository: ${{ github.repository }}
+                    Commit: ${{ github.sha }}
+                    Environment: Production
+                    Triggered by: ${{ github.actor }}
+                  username: 'GitHub Actions Bot'
             - name: Run Tests
               run: npm test
             - name: Install Playwright Browsers
@@ -54,7 +66,36 @@ jobs:
           - name: Checkout repository
             uses: actions/checkout@v3
           - name: Create Tag
+            id: create_tag
             uses: anothrNick/github-tag-action@1.64.0
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               DEFAULT_BUMP: patch
+          - name: Discord Success Notification
+            uses: rjstone/discord-webhook-notify@v2
+            with:
+              webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+              text: |
+                Deployment Succeeded!
+                Repository: ${{ github.repository }}
+                Commit: ${{ github.sha }}
+                Environment: Production
+                Deployed by: ${{ github.actor }}
+                Version: ${{ steps.create_tag.outputs.new_tag }}
+              username: 'GitHub Actions Bot'
+    # success_notification:
+    #     needs: [simple_deployment_pipeline, tag_release]
+    #     runs-on: ubuntu-latest
+    #     if: needs.simple_deployment_pipeline.outputs.job2_can_run == 'true'
+    #     steps:
+    #         - name: Send Success Notification
+    #           uses: rjstone/discord-webhook-notify@v2
+    #           with:
+    #             webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
+    #             text: |
+    #               Deployment Succeeded!
+    #               Repository: ${{ github.repository }}
+    #               Commit: ${{ github.sha }}
+    #               Environment: Production
+    #               Deployed by: ${{ github.actor }}
+    #             username: 'GitHub Actions Bot'
