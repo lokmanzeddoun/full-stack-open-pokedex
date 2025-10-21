@@ -23,17 +23,10 @@ jobs:
             - name: Build Application
               run: npm run build
             - name: Build Failure Discord Notification
-              uses: rjstone/discord-webhook-notify@v2
+              uses: sarisia/actions-status-discord@v1.15.4
               if: ${{ failure() }}
               with:
-                  webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-                  text: |
-                    Build Failed!
-                    Repository: ${{ github.repository }}
-                    Commit: ${{ github.sha }}
-                    Environment: Production
-                    Triggered by: ${{ github.actor }}
-                  username: 'GitHub Actions Bot'
+                  webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
             - name: Run Tests
               run: npm test
             - name: Install Playwright Browsers
@@ -69,15 +62,7 @@ jobs:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               DEFAULT_BUMP: patch
           - name: Discord Success Notification
-            uses: rjstone/discord-webhook-notify@v2
+            uses: sarisia/actions-status-discord@v1.15.4
             with:
-              webhookUrl: ${{ secrets.DISCORD_WEBHOOK_URL }}
-              text: |
-                Deployment Succeeded!
-                Repository: ${{ github.repository }}
-                Commit: ${{ github.sha }}
-                Environment: Production
-                Deployed by: ${{ github.actor }}
-                Version: ${{ steps.create_tag.outputs.new_tag }}
-              username: 'GitHub Actions Bot'
+              webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
     
